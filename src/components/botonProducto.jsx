@@ -6,10 +6,10 @@ export default function Boton() {
 
     const nueva = () => {
         // Redirigir a la página de nuevo usuario
-        router.push('/usuarios/nuevo');
+        router.push('/productos/nuevo');
     };
 
     return (
-        <button onClick={nueva}>Nuevo usuario</button>
+        <button onClick={nueva}>Nuevo Producto</button>
     );
 }
