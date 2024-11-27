@@ -2,25 +2,23 @@
 
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import Link from 'next/link';
-import Boton from "@/components/botonVentas";
-import CancelarVenta from "@/components/cancelar";
 
 export default function Ventas() {
-    const [ventass, setVentass] = useState([]);
+    const [ventas, setVentas] = useState([]);
 
-    const getVentass = async () => {
+    const getVentas = async () => {
         try {
-            const response = await axios.get('http://localhost:3000/ventas/mostrarVenta');
-            setVentass(response.data);
+            const response = await axios.get('http://localhost:3000/ventas/mostrarVentas');
+            const ventasVendidas = response.data.filter((venta) => venta.estatus === 'vendido');
+            setVentas(ventasVendidas);
         } catch (error) {
-            console.error('Error fetching sales:', error);
+            console.error('Error al cargar las ventas:', error);
         }
     };
 
     useEffect(() => {
-        getVentass(); // Cargar ventas al montar el componente
-    }, []); // Dependencias vacías para que solo se ejecute una vez
+        getVentas(); 
+    }, []);
 
     return (
         <div>
@@ -28,36 +26,47 @@ export default function Ventas() {
             <table className="table">
                 <thead>
                     <tr>
-                        <th>Id</th>
                         <th>Usuario</th>
                         <th>Producto</th>
                         <th>Cantidad</th>
-                        <th>Fecha Hora</th>
-                        <th>Estatus</th>
                         <th>Editar/Cancelar</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {ventass.map((venta) => (
+                    {ventas.map((venta) => (
                         <tr key={venta.id}>
-                            <td>{venta.id}</td> 
-                            <td>{venta.nombreUsuario}</td> 
-                            <td>{venta.nombreProducto}</td> 
-                            <td>{venta.cantidad}</td> 
-                            <td>{venta.fecha}</td> 
-                            <td>{venta.estatus}</td>
+                            <td>{venta.nombreUsuario}</td>
+                            <td>{venta.nombreProducto}</td>
+                            <td>{venta.cantidad}</td>
                             <td>
-                                <Link href={`/ventas/editar/${venta.id}`}>
-                                    Editar
-                                </Link>
-                                &nbsp;
-                                <CancelarVenta id={venta.id} />
+                                <a href={`/ventas/editar/${venta.id}`} className="btn btn-primary btn-sm me-2">Editar</a>
+                                <button 
+                                    className="btn btn-danger btn-sm" 
+                                    onClick={() => cancelarVenta(venta.id)}
+                                >
+                                    Cancelar
+                                </button>
                             </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
-            <Boton />
         </div>
     );
 }
+
+// Función para cancelar una venta (cambia el estado a "cancelado")
+async function cancelarVenta(id) {
+    try {
+       const confirmacion = confirm("¿Estás seguro de que deseas cancelar esta venta?");
+        if (!confirmacion) return;
+
+        const response = await axios.put(`http://localhost:3000/ventas/cancelarVenta/${id}`);
+        if (response.data.success) {
+            location.reload(); 
+        } else {
+        }
+    } catch (error) {
+    }
+}
+

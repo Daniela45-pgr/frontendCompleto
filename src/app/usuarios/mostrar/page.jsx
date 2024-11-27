@@ -5,9 +5,17 @@ import axios from "axios";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+async function getSessionUsuario() {
+    console.log("estas en getSession");
+    const url="http://localhost:3000/usuarios/getSessionUsuario";
+    const sessionValida=await axios.get(url);
+    console.log(sessionValida.data);
+    
+}
+
 export default function Usuarios() {
     const [usuarioss, setUsuarioss] = useState([]);
-
+    getSessionUsuario();  
     const getUsuarios = async () => {
         const url = "http://localhost:3000/usuarios";
         const response = await axios.get(url);

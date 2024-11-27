@@ -1,63 +1,54 @@
-"use client";
-import axios from "axios";
+"use client"; 
 
-async function guardarVenta(e) {
-    e.preventDefault();
-    console.log("función guardar venta");
-    const url = "http://localhost:3000/ventas/nuevaVenta";
-    const datos = {
-        idUsuario: document.getElementById("idUsuario").value,
-        idProducto: document.getElementById("idProducto").value,
-        cantidad: document.getElementById("cantidad").value,
-    };
-    
-    try {
-        const respuesta = await axios.post(url, datos);
-        console.log(respuesta);
-        // Redirigir a la página de mostrar ventas después de guardar
-        location.replace("http://localhost:3001/ventas/mostrar");
-    } catch (error) {
-        console.error('Error al guardar la venta:', error);
-    }
-}
+import { useState } from "react"; 
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import AutoCompleteInput from "@/components/AutoCompleteInput"; 
+
 
 export default function NuevaVenta() {
+  const [selectedUsuario, setSelectedUsuario] = useState(null);
+  const [selectedProducto, setSelectedProducto] = useState(null);
+  const [cantidad, setCantidad] = useState("");
+
+    const guardarVenta = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.post("http://localhost:3000/ventas/nuevaVenta", {
+                idUsuario: selectedUsuario.id,
+                idProducto: selectedProducto.id,
+                cantidad,
+            });
+            location.replace("/ventas/mostrar");
+        } catch (error) {
+            console.error("Error al guardar la venta:", error);
+        }
+    };
+
     return (
-        <div className="m-0 row row-justify-content">
-            <form onSubmit={guardarVenta} className="col-6 mt-5">
-                <div className="card">
-                    <div className="card-header">
-                        <h1>Nueva Venta</h1>
-                    </div>
-                    <div className="card-body">
-                        <input 
-                            style={{ height: "70px" }} 
-                            className="form-control mb-3" 
-                            type="text" 
-                            id="idUsuario" 
-                            placeholder="ID del Usuario" 
-                            autoFocus 
-                        />
-                        <input 
-                            style={{ height: "70px" }} 
-                            className="form-control mb-3" 
-                            type="text" 
-                            id="idProducto" 
-                            placeholder="ID del Producto" 
-                        />
-                        <input 
-                            style={{ height: "70px" }} 
-                            className="form-control mb-3" 
-                            type="number" 
-                            id="cantidad" 
-                            placeholder="Cantidad" 
-                        />
-                    </div>
-                    <div className="card-footer">
-                        <button type="submit" style={{ height: "50px" }} className="btn btn-primary col-12">Guardar Venta</button>
-                    </div>
-                </div>
-            </form>
+        <div className="m-0 row justify-content-center">
+            <form onSubmit={guardarVenta} className="col-6 mt-5" action="">
+            <h1>Nueva Venta</h1>
+            <AutoCompleteInput
+                placeholder="Buscar Usuario"
+                fetchUrl="http://localhost:3000/ventas/buscarUsuarios"
+                onSelect={setSelectedUsuario}
+            />
+            <AutoCompleteInput
+                placeholder="Buscar Producto"
+                fetchUrl="http://localhost:3000/ventas/buscarProductos"
+                onSelect={setSelectedProducto}
+            />
+            <input
+                type="number"
+                value={cantidad}
+                onChange={(e) => setCantidad(e.target.value)}
+                placeholder="Cantidad"
+                className="form-control mb-3"
+            />
+            <button type="submit" className="btn btn-primary col-12">Guardar Venta</button>
+        </form>
         </div>
+        
     );
 }

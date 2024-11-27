@@ -1,4 +1,4 @@
-'use client'; // Asegúrate de que esto esté presente para que sea un componente del lado del cliente
+'use client'; 
 
 import { useEffect, useState } from 'react';
 import axios from 'axios';

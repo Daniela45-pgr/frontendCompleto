@@ -1,11 +1,11 @@
-'use client'; // Asegúrate de que esto esté presente para que sea un componente del lado del cliente
+'use client';
 
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 
 const Page = ({ params }) => {
-    const { id } = params; // Extrae el id de los parámetros de la URL
+    const { id } = params; 
     const [usuario, setUsuario] = useState(null);
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({
@@ -72,7 +72,7 @@ const Page = ({ params }) => {
     if (!usuario) {
         return <p>Usuario no encontrado.</p>;
     }
-
+ 
     return (
         <div className="m-0 row row-justify-content">
             <form onSubmit={guardarUsuario} className="col-6 mt-5">

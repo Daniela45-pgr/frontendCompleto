@@ -1,104 +1,97 @@
-'use client'; // Asegúrate de que esto esté presente para que sea un componente del lado del cliente
+"use client";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import AutoCompleteInput from "@/components/AutoCompleteInput";
 
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useRouter } from 'next/navigation';
-
-const Page = ({ params }) => {
-    const { id } = params; // Extrae el id de los parámetros de la URL
+export default function EditarVenta({ params }) {
+    const { id } = params;
     const [venta, setVenta] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [formData, setFormData] = useState({
-        nombreProducto: '',
-        cantidad: ''
-    });
-
+    const [selectedUsuario, setSelectedUsuario] = useState(null);
+    const [selectedProducto, setSelectedProducto] = useState(null);
+    const [cantidad, setCantidad] = useState("");
     const router = useRouter();
 
-    // Función para cargar la venta
     useEffect(() => {
         const fetchVenta = async () => {
             try {
                 const response = await axios.get(`http://localhost:3000/ventas/buscarVentaPorID/${id}`);
-                setVenta(response.data);
+                const venta = response.data;
+                setVenta(venta);
+                setSelectedUsuario({ id: venta.idUsuario, nombre: venta.nombreUsuario });
+                setSelectedProducto({ id: venta.idProducto, nombre: venta.nombreProducto });
+                setCantidad(venta.cantidad);
                 setLoading(false);
-                setFormData({
-                    nombreProducto: response.data.nombreProducto,
-                    cantidad: response.data.cantidad
-                });
             } catch (error) {
-                console.error('Error fetching sale:', error);
-                setLoading(false); // Para dejar de mostrar "Cargando..." incluso si hay un error
+                console.error("Error fetching sale:", error);
+                setLoading(false);
             }
         };
-
+    
         if (id) {
             fetchVenta();
         }
     }, [id]);
+    
+    
 
     const guardarVenta = async (e) => {
         e.preventDefault();
-        
-        const updatedData = {};
-        if (formData.nombreProducto) updatedData.nombreProducto = formData.nombreProducto;
-        if (formData.cantidad) updatedData.cantidad = formData.cantidad;
+    
+        if (!selectedUsuario || !selectedProducto) {
+            alert("Por favor selecciona un usuario y un producto válidos.");
+            return;
+        }
     
         try {
-            await axios.put(`http://localhost:3000/ventas/editarVenta/${id}`, updatedData);
-           // alert('Venta actualizada con éxito');
-            router.push('/ventas/mostrar'); // Redirigir a la lista de ventas después de guardar
+            await axios.put(`http://localhost:3000/ventas/editarVenta/${id}`, {
+                idUsuario: selectedUsuario.id,
+                idProducto: selectedProducto.id,
+                cantidad,
+            });
+            router.push("/ventas/mostrar");
         } catch (error) {
-            console.error('Error al actualizar la venta:', error);
-           // alert('Error al actualizar la venta');
+            console.error("Error al actualizar la venta:", error);
         }
     };
-    
     
 
     if (loading) {
         return <p>Cargando...</p>;
     }
 
-    if (!venta) {
-        return <p>Venta no encontrada.</p>;
-    }
-
     return (
-        <div className="m-0 row row-justify-content">
-            <form onSubmit={guardarVenta} className="col-6 mt-5">
-                <div className="card">
-                    <div className="card-header">
-                        <h1>Editar Venta</h1>
-                    </div>
-                    <div className="card-body">
-                        <input
-                            style={{ height: "70px" }}
-                            className="form-control mb-3"
-                            type="text"
-                            id="nombreProducto"
-                            placeholder="Nombre del Producto"
-                            value={formData.nombreProducto}
-                            onChange={(e) => setFormData({ ...formData, nombreProducto: e.target.value })}
-                            autoFocus
-                        />
-                        <input
-                            style={{ height: "70px" }}
-                            className="form-control mb-3"
-                            type="number"
-                            id="cantidad"
-                            placeholder="Cantidad"
-                            value={formData.cantidad}
-                            onChange={(e) => setFormData({ ...formData, cantidad: e.target.value })}
-                        />
-                    </div>
-                    <div className="card-footer">
-                        <button type="submit" style={{ height: "50px" }} className="btn btn-primary col-12">Actualizar Venta</button>
-                    </div>
-                </div>
-            </form>
+        <div className="m-0 row justify-content-center">
+             <form onSubmit={guardarVenta} className="col-6 mt-5" action="">
+            <h1>Editar Venta</h1>
+            <AutoCompleteInput
+                placeholder="Buscar Usuario"
+                fetchUrl="http://localhost:3000/ventas/buscarUsuarios"
+                onSelect={setSelectedUsuario}
+                initialValue={venta?.nombreUsuario || ""}
+            />
+            <AutoCompleteInput
+                placeholder="Buscar Producto"
+                fetchUrl="http://localhost:3000/ventas/buscarProductos"
+                onSelect={setSelectedProducto}
+                initialValue={venta?.nombreProducto || ""}
+            />
+            <input
+                type="number"
+                value={cantidad || ""}
+                onChange={(e) => setCantidad(e.target.value)}
+                placeholder="Cantidad"
+                className="form-control mb-3"
+            />
+            <button type="submit" className="btn btn-primary col-12">
+                Actualizar Venta
+            </button>
+        </form>
         </div>
+       
     );
-};
+}
 
-export default Page;
+
+
